@@ -20,7 +20,7 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String LOG_TAG = "AudioRecordTest";
+    private static final String LOG_TAG = "Looper Test";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static String fileName = null;
 
@@ -70,18 +70,26 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void handleRecording(View v) {
+        Log.e(LOG_TAG, "recording clicked"+fileName);
         boolRecording = (boolRecording) ? false : true; // toggle recording boolean
         if(boolRecording) {
             recordButton.setText("Stop recording");
             boolRecording = true;
             //playButton.setEnabled(false);
             //recordButton.setEnabled(true);
-
+            // MP4 quality settings from https://stackoverflow.com/questions/56854199/how-to-record-good-quality-audio-using-mediarecoder-in-android
             recorder = new MediaRecorder();
             recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            recorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+            recorder.setAudioEncodingBitRate(16*44100);
+            recorder.setAudioSamplingRate(44100);
             recorder.setOutputFile(fileName);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+
+
+
+
 
             try {
                 recorder.prepare();
@@ -110,13 +118,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Record to the external cache directory for visibility
         fileName = getExternalCacheDir().getAbsolutePath();
-        fileName += "/audiorecordtest.3gp";
+        fileName += "/audiorecordtest.m4a";
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
     }
 
-    @Override
+    @Override // overriding the onstop method to make sure all resources are released when app is stopped.
     public void onStop() {
         super.onStop();
         if (recorder != null) {
